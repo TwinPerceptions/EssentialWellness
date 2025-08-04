@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login</title>
+</head>
+<body>
+    <h2>Test Login</h2>
+    <form id="loginForm">
+        <input type="email" id="email" value="jacqui@twinperceptions.com" placeholder="Email" required>
+        <input type="password" id="password" value="admin123" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    
+    <div id="result"></div>
+    
+    <script>
+        document.getElementById('loginForm').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const result = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({email, password}),
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                result.innerHTML = '<h3>Login Result:</h3><pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                // Test auth check
+                const authCheck = await fetch('/api/auth/me', {credentials: 'include'});
+                const authData = await authCheck.json();
+                result.innerHTML += '<h3>Auth Check:</h3><pre>' + JSON.stringify(authData, null, 2) + '</pre>';
+                
+            } catch (error) {
+                result.innerHTML = '<h3>Error:</h3><pre>' + error.message + '</pre>';
+            }
+        };
+    </script>
+</body>
+</html>

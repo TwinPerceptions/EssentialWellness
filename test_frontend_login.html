@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Frontend Login Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-group { margin: 10px 0; }
+        input, button { padding: 8px; margin: 5px; }
+        .result { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h2>Frontend Login Test</h2>
+    
+    <div class="form-group">
+        <input type="email" id="email" value="jacqui@twinperceptions.com" placeholder="Email">
+    </div>
+    <div class="form-group">
+        <input type="password" id="password" value="admin123" placeholder="Password">
+    </div>
+    <div class="form-group">
+        <button onclick="testLogin()">Test Login</button>
+        <button onclick="checkAuth()">Check Auth</button>
+        <button onclick="testLogout()">Test Logout</button>
+    </div>
+    
+    <div id="result" class="result">Ready to test...</div>
+    
+    <script>
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const result = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                result.innerHTML = `
+                    <h3>Login Result (${response.status}):</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                // Auto-check auth after login
+                setTimeout(checkAuth, 1000);
+                
+            } catch (error) {
+                result.innerHTML = `<h3>Login Error:</h3><pre>${error.message}</pre>`;
+            }
+        }
+        
+        async function checkAuth() {
+            const result = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/api/auth/me', {
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                result.innerHTML += `
+                    <h3>Auth Check (${response.status}):</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                result.innerHTML += `<h3>Auth Error:</h3><pre>${error.message}</pre>`;
+            }
+        }
+        
+        async function testLogout() {
+            const result = document.getElementById('result');
+            
+            try {
+                const response = await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                result.innerHTML = `
+                    <h3>Logout Result (${response.status}):</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+            } catch (error) {
+                result.innerHTML = `<h3>Logout Error:</h3><pre>${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>
